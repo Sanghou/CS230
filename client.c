@@ -48,7 +48,8 @@ void download(int socket, char* filename) {
 }
 
 int main(int argc, char* argv[]) {
-  list();
+
+  int c; 
 
   int c;
 
