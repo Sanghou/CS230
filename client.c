@@ -3,11 +3,14 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <netdb.h>
+#include <dirent.h>
 #include <arpa/inet.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 
 #define MAX 100
+#define BUF 1000000
+
 /*
  * DESCRIPTION: List files in "client_files" directory
  * 
@@ -35,11 +38,9 @@ void upload(int socket, char* filename) {
   struct dirent *dent;
 
   int proper = 0;
+  dir = opendir("Client/");
 
-	filename[strlen(filename)] = '\0';
-
-  dir = opendir('Client/');
-
+/*
   if (dir != NULL) {
     while((dent=readdir(dir)) != NULL){
       if (strcmp(dent->d_name,filename)==0) {
@@ -55,25 +56,52 @@ void upload(int socket, char* filename) {
     printf("no such file \n");
     exit(-1);
   }
-
+*/
+  int file_len = strlen(filename) + 16;
   FILE *file;
-  char* full_name = '/Client/';
+  char full_name[file_len];
+
+  char buf[BUF];
+
+  strcpy(full_name, "./Client_files/");
   strcat(full_name,filename);
 
   printf("%s\n",full_name);
 
   file = fopen(full_name, "rb");
 
-  send(socket, file, strlen(filename),0);
+  if (file == NULL) {
+	printf("no such file \n");
+	close(dir);
+        exit(-1);
+  }
+  //send file name
 
+  send(socket, "upload", sizeof("upload"), 0);
 
+  send(socket, filename, sizeof(filename), 0);
+  printf("send name\n");
+	
+  int file_size = lseek(file,0, SEEK_END);
+  //send file_size
+  send(socket, &file_size, sizeof(file_size),0);
+  printf("send size \n");
+  lseek(file, 0, SEEK_SET);
+  
+  int read_size = 0;
+  int total = 0;
 
-  close(dir);
+  while ( total != file_size) {
+    read_size = read(file, buf, BUF);
+    total += read_size;
+    buf[read_size] = '\0';
+    send(socket, buf, read_size, 0);
+    printf("sending \n");
+  }
+  close(file);
+  closedir(dir);
 
-	printf("filename : %s", filename); 
-
-
-
+  printf("end upload \n");
 }
 
 /*
@@ -157,8 +185,9 @@ int main(int argc, char* argv[]) {
     fgets(str, MAX, stdin);
 
     memcpy(cmd, str, MAX);	
-    cmd[strlen(str) - 1] = '\0';
-    
+    cmd[strlen(cmd) - 1] = '\0';
+   
+ 
     printf("input : %s \n", cmd);
 	
     strtok_r(cmd," ", &arg);
@@ -166,15 +195,18 @@ int main(int argc, char* argv[]) {
     printf("**%s**\n", cmd);
     printf("**%s**\n", arg);
 
-
-    if(strncmp(cmd,"ls",2) == 0) {
+    if(strcmp(cmd,"ls") == 0) {
+	printf("list!\n");
 	list();
     } else if (strcmp(cmd,"upload") == 0 ) {
+	printf("upload!\n");
 	upload(socket_fd,arg);
+	printf("end upload!\n");
     } else if (strcmp(cmd,"download") == 0) {
+	printf("download! \n");
 	download(socket_fd,arg);
     }
-
+    printf("end cmd");
     free(cmd);
 
   }
