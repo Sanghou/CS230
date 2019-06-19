@@ -30,8 +30,50 @@ void list() {
  * NOTES: If no such file exists, then print "Error: no such file" in stdout
  */
 void upload(int socket, char* filename) {
+
+  DIR *dir;
+  struct dirent *dent;
+
+  int proper = 0;
+
 	filename[strlen(filename)] = '\0';
+
+  dir = opendir('Client/');
+
+  if (dir != NULL) {
+    while((dent=readdir(dir)) != NULL){
+      if (strcmp(dent->d_name,filename)==0) {
+        printf("exists want file!!");
+        proper = 1;
+        break;
+      }
+      printf(dent->d_name);
+    }
+  }
+
+  if (!proper) {
+    printf("no such file \n");
+    exit(-1);
+  }
+
+  FILE *file;
+  char* full_name = '/Client/';
+  strcat(full_name,filename);
+
+  printf("%s\n",full_name);
+
+  file = fopen(full_name, "rb");
+
+  send(socket, file, strlen(filename),0);
+
+
+
+  close(dir);
+
 	printf("filename : %s", filename); 
+
+
+
 }
 
 /*
