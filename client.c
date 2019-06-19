@@ -2,6 +2,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <netdb.h>
 #include <arpa/inet.h>
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -49,6 +50,8 @@ void download(int socket, char* filename) {
 int main(int argc, char* argv[]) {
   list();
 
+  int c;
+
   char *ipAddress;
   char *portNumber;
   int status;
@@ -70,7 +73,7 @@ int main(int argc, char* argv[]) {
       }
   }
 
-  for (index = optind; index < argc; index++)
+  for (int index = 0; index < argc; index++)
     printf ("Non-option argument %s\n", argv[index]);
 
   memset(&hints, 0, sizeof hints);
@@ -103,7 +106,7 @@ int main(int argc, char* argv[]) {
   	printf("[20150148]> ");
   	gets(str);
 
-  	char cmd[] = str;
+	printf("%s \n",str);
   }
 
   // check = send(socket_fd, msg, htonl(length), 0);
