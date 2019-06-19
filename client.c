@@ -2,6 +2,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <netdb.h>
 #include <arpa/inet.h>
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -47,7 +48,8 @@ void download(int socket, char* filename) {
 }
 
 int main(int argc, char* argv[]) {
-  list();
+
+  int c; 
 
   char *ipAddress;
   char *portNumber;
@@ -104,6 +106,8 @@ int main(int argc, char* argv[]) {
   	gets(str);
 
   	char cmd[] = str;
+
+  	printf("%s \n", cmd);
   }
 
   // check = send(socket_fd, msg, htonl(length), 0);
