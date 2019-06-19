@@ -7,6 +7,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 
+#define MAX 100
 /*
  * DESCRIPTION: List files in "client_files" directory
  * 
@@ -14,7 +15,7 @@
  * RETURNS: None
  */
 void list() {
-	system('ls client_files/');
+	system("ls Client_files/");
 }
 
 /*
@@ -29,7 +30,8 @@ void list() {
  * NOTES: If no such file exists, then print "Error: no such file" in stdout
  */
 void upload(int socket, char* filename) {
-    
+	filename[strlen(filename)] = '\0';
+	printf("filename : %s", filename); 
 }
 
 /*
@@ -44,14 +46,12 @@ void upload(int socket, char* filename) {
  * NOTES: If no such file exists, then print "Error: no such file" in stdout
  */
 void download(int socket, char* filename) {
-    
+    printf("filename : %s",filename);
 }
 
 int main(int argc, char* argv[]) {
 
   int c; 
-
-  int c;
 
   char *ipAddress;
   char *portNumber;
@@ -67,9 +67,9 @@ int main(int argc, char* argv[]) {
         break;
       case 'p':
         portNumber = optarg;
-        break;
+	break;
       default:
-      	printf("other language %s \n", c);
+	printf("other language %s \n", c);
         abort ();
       }
   }
@@ -99,15 +99,42 @@ int main(int argc, char* argv[]) {
 
   check = connect(socket_fd, servinfo->ai_addr, servinfo->ai_addrlen);
   printf("connect : %d \n", check);
-  
+ 
+	
+  char str[MAX];
+ 
   while (1) {
 
-  	char* str;
+    char* arg;
+    char* cmd;
 
-  	printf("[20150148]> ");
-  	gets(str);
+    cmd = (char *) malloc(MAX);
 
-	printf("%s \n",str);
+    printf("[20150148]> ");
+
+    fgets(str, MAX, stdin);
+
+    memcpy(cmd, str, MAX);	
+    cmd[strlen(str) - 1] = '\0';
+    
+    printf("input : %s \n", cmd);
+	
+    strtok_r(cmd," ", &arg);
+	
+    printf("**%s**\n", cmd);
+    printf("**%s**\n", arg);
+
+
+    if(strncmp(cmd,"ls",2) == 0) {
+	list();
+    } else if (strcmp(cmd,"upload") == 0 ) {
+	upload(socket_fd,arg);
+    } else if (strcmp(cmd,"download") == 0) {
+	download(socket_fd,arg);
+    }
+
+    free(cmd);
+
   }
 
   // check = send(socket_fd, msg, htonl(length), 0);
