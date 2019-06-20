@@ -76,22 +76,27 @@ void upload(int socket, char* filename) {
         exit(-1);
   }
   //send file name
+  memset(buf, 0x00, BUF);
+  memcpy(buf, "upload", sizeof("upload"));
+  send(socket, buf, sizeof(buf), 0);
 
-  send(socket, "upload", sizeof("upload"), 0);
-
-  send(socket, filename, sizeof(filename), 0);
-  printf("send name\n");
+  memcpy(buf, filename, sizeof(filename));
+  send(socket, buf, sizeof(buf), 0);
+  printf("send name %s\n", filename);
 	
   int file_size = lseek(file,0, SEEK_END);
   //send file_size
-  send(socket, &file_size, sizeof(file_size),0);
-  printf("send size \n");
+  //send(socket, &file_size, sizeof(file_size),0);
+  //printf("send size %d\n", sizeof(file_size));
   lseek(file, 0, SEEK_SET);
   
   int read_size = 0;
   int total = 0;
 
+  printf("total %d, file_size %d \n", total, file_size);
+
   while ( total != file_size) {
+    memset(buf,0x00,BUF);
     read_size = read(file, buf, BUF);
     total += read_size;
     buf[read_size] = '\0';
